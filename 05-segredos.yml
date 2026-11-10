@@ -1,0 +1,32 @@
+name: Secrets e Variables
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/05-segredos.yml
+
+jobs:
+  segredos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Utilizando uma Variable
+        run: echo "Servidor ${{ vars.MEU_SERVIDOR }}"
+
+      - name: Utilizando um Secret
+        env: 
+          SENHA: ${{ secrets.MINHA_SENHA }}
+        run: |
+          echo "A Senha é: ${SENHA}"
+          echo "A senha tem ${#SENHA} caracteres"
+
+      - name: o mascaramento não é uma proteção
+        env: 
+          SENHA: ${{ secrets.MINHA_SENHA }}
+        run: echo "${SENHA}" | sed 's/./& /g'
+
+
+      - name: Um secret que nao existe
+        env: 
+          OUTRA: ${{ secrets.NAO_EXISTE }}
+        run: echo "Valor [${OUTRA}]"
+
