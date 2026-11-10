@@ -1,0 +1,24 @@
+name: Contextos
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/04-contextos.yml
+
+jobs:
+  contextos:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Contexto do Gitea
+        run: |
+          echo "Repositorio: ${{ gitea.repository }}"
+          echo "Branch: ${{ gitea.ref_name }}"
+          echo "Commit: ${{ gitea.sha }}"
+          echo "Autor: ${{ gitea.actor }}"
+          echo "Evento: ${{ gitea.event_name }}"
+          echo "Execução: ${{ gitea.run_number }}"
+          echo "Servidor: ${{ gitea.server_url }}"
+          echo "workspace: ${{ gitea.workspace }}"
+
+      - name: As mesmas informaações como variáveis de ambiente
+        run: env | grep -E '^GITHUB_(REPOSITORY|REF_NAME|SHA|ACTOR|EVENT_NAME|RUN_NUMBER|SERVER_URL|WORKSPACE)=' | sort
