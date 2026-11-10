@@ -1,10 +1,11 @@
 name: Primeiro Workflow
-on:
+
+on: 
   push:
-    branches:
-      - main
-    paths:
-      - '.gitea/workflows/primeiro.yml'
+     branches:
+       - main
+     paths:
+       - '.gitea/workflows/01-primeiro.yml'
   workflow_dispatch:
 
 jobs:
@@ -12,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Mensagem
-        run: echo "Meu primeiro workflow no Gitea Actions"
-
-      - name: Onde estou ?
+        run: echo "Meu primeiro workflow no Gitea Actions!"
+      
+      - name: Onde estou?
         run: |
           hostname
           whoami
