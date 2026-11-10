@@ -1,0 +1,16 @@
+name: Niveis
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/06-niveis.yml
+
+
+jobs:
+   niveis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Variables a organização e do repositorio
+        run: |
+          echo "EMPRESA: ${{ vars.EMPRESA }}"
+          echo "AMBIENTE: ${{ vars.AMBIENTE }}"
