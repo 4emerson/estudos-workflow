@@ -1,0 +1,30 @@
+name: Workflow com parâmetros
+
+on:
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: "Ambiente de destino"
+        type: choice
+        options:
+          - homolog
+          - producao
+        default: homolog
+      versao:
+        description: "Versão da aplicação"
+        type: string
+        required: true
+      executar_testes:
+        description: "Executar testes?"
+        type: boolean
+        default: true
+
+jobs:
+  parametros:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exibir parâmetros
+        run: |
+          echo "Ambiente: ${{ github.event.inputs.ambiente }}"
+          echo "Versão: ${{ github.event.inputs.versao }}"
+          echo "Executar testes: ${{ github.event.inputs.executar_testes }}"
