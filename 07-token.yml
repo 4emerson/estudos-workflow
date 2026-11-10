@@ -1,0 +1,18 @@
+name: Token automatico
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/07-token.yml
+
+jobs:
+  token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultando a API do Gitea com o token automatico
+        env:
+          TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          curl -s -H "Authorization: token ${TOKEN}" \
+            ${{ gitea.server_url }}/api/v1/repos/${{ gitea.repository }} \
+            | grep -o '"full_name":"[^"]\+"'
