@@ -1,0 +1,30 @@
+name: Variaveis
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/03-variaveis.yml
+
+env:
+  IMAGE_NAME: course_catalog
+  AMBIENTE: workflow
+
+jobs:
+  variaveis:
+    runs-on: ubuntu-latest
+    env:
+      AMBIENTE: job
+    steps:
+      - name: Variaveal do workflow e do job
+        run: echo "Imagem ${IMAGE_NAME} - Ambiente ${AMBIENTE}"
+
+      - name: Variaveis do step
+        env:
+          AMBIENTE: step
+        run: echo "Imagem ${IMAGE_NAME} - Ambiente ${AMBIENTE}"
+
+      - name: Shell ou expressão ?
+        run: |
+          echo "Pelo Shell: ${IMAGE_NAME}"
+          echo "Pela expressão: ${{ env.IMAGE_NAME }}"
+       
