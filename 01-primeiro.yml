@@ -1,0 +1,22 @@
+name: Primeiro Workflow
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.gitea/workflows/primeiro.yml'
+  workflow_dispatch:
+
+jobs:
+  ola:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mensagem
+        run: echo "Meu primeiro workflow no Gitea Actions"
+
+      - name: Onde estou ?
+        run: |
+          hostname
+          whoami
+          pwd
+          grep PRETTY_NAME /etc/os-release
