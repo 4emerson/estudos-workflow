@@ -1,0 +1,37 @@
+name: Artefatos
+on:
+  push:
+    paths: 
+      - '.gitea/workflows/13-artefatos.yml'
+
+
+jobs:
+  gera:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gerando um relatório
+        run: |
+          mkdir relatorio
+          echo "Relatório da execução ${{ gitea.run_number }}" > relatorio/resultado.txt
+
+      - name: Publicando o artefato
+        uses: actions/upload-artifact@v3
+        with:
+          name: relatorio
+          path: relatorio/
+
+  consome:
+    runs-on: ubuntu-latest
+    needs: gera
+    steps:
+      - name: Sem o artefato o arquivo não existe
+        run: ls relatorio || echo "diretório não encontrado"
+
+      - name: Baixando o artefato
+        uses: actions/download-artifact@v3
+        with:
+          name: relatorio
+          path: relatorio/
+
+      - name: Lendo o relatório
+        run: cat relatorio/resultado.txt
