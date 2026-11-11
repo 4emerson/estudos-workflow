@@ -1,0 +1,34 @@
+name: Saidas
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/08-saidas.yml
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.versao.outputs.tag }}
+
+    steps:
+      - name: Definindo a versão
+        id: versao
+        run: echo "tag=0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+      
+      - name: Utilizando no mesmo job
+        run: echo "Versão ${{ steps.versao.outputs.tag }}"
+
+      - name: Criando uma variável para os proximos steps
+        run: echo "IMAGE=course_catalog:${{ steps.versao.outputs.tag }}" >> "$GITHUB_ENV"
+
+      - name: Utilizando a variável
+        run: echo "Imagem ${IMAGE}"
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Utilizando em outro job
+        run: echo "Versão ${{ needs.build.outputs.tag }}"
