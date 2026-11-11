@@ -1,0 +1,36 @@
+name: Docker 
+on:
+  push:
+    paths:
+      - '.gitea/workflows/14-docker.yml'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker dentro do job
+        run: docker version --format 'Cliente {{.Client.Version}} - Servidor {{.Server.Version}}'
+
+      - name: Build de uma imagem
+        run: | 
+          echo 'FROM alpine' > Dockerfile
+          echo 'RUN echo "Gerado no build" > /result.txt' >> Dockerfile
+          docker build -q -t estudo:${{ gitea.run_number }} .
+
+
+      - name: A pegadinha do volume
+        run: |
+           echo "arquivo do job" > meu--arquivo.txt
+            docker run --rm -v "$PWD:/dados" alpine ls /dados
+
+      - name: Trocando arquivos com docker cp
+        run: |
+          docker create --name estudo-${{ gitea.run_number }} estudo:${{ gitea.run_number }}
+          docker cp estudo-${{ gitea.run_number }}:/result.txt .
+          cat result.txt
+
+      - name: Limpeza
+        if: always()
+        run: |
+          docker rm -f estudo:${{ gitea.run_number }} || true
+          docker image rm -f estudo:${{ gitea.run_number }} || true
