@@ -1,0 +1,20 @@
+name: Action propria
+
+on:
+  push:
+    paths: 
+      - '.gitea/workflows/12-action-propria.yml'
+
+
+jobs:
+  saudacao:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamando a nossa action
+        id: ola
+        uses: http://192.168.88.10:3000/524-8977/saudacao@v1
+        with:
+          nome: Emerson
+
+      - name: Utilizando a saída da action
+        run: echo "A action responde em ${{ steps.ola.outputs.horario }}"
