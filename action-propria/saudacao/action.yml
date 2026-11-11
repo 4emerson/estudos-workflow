@@ -1,0 +1,27 @@
+name: Saudacao
+description: Exibe uma saudação e devolve o horario de execução
+
+
+inputs:
+  nome:
+    description: Quem será saudado
+    required: true
+
+outputs:
+  horario:
+    description: Horário em que a action foi executada
+    value: ${{ steps.agora.outputs.horario }}
+
+
+runs:
+  using: composite
+  steps:
+    - name: Saudação
+      shell: bash
+      run: echo "Olá ${{ inputs.nome }}! Esta mensagem veio de uma action"
+
+
+    - name: Horário
+      id: agora
+      shell: bash
+      run: echo "horario=$(date +%H:%M:%S)" >> "$GITHUB_OUTPUT"
