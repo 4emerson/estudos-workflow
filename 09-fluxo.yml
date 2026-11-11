@@ -1,0 +1,36 @@
+name: Controle de Fluxo
+
+on:
+  push:
+    paths:
+      - .gitea/workflows/09-fluxo.yml
+
+
+jobs:
+  fluxo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Somente main
+        if: gitea.ref_name == 'main'
+        run: echo "Estou na branch main"
+
+      - name: Somente em Pull Request
+        if: gitea.event_name == 'pull_request'
+        run: echo "Estou em um Pull Request"
+
+      
+      - name: Passo que falha
+        run: | 
+          echo "Vou falhar"
+          exit 1
+      
+      - name: Não executa
+        run: echo "O step anterior falhou, então não vou executar"
+
+      - name: Executa somente em falha
+        if: failure()
+        run: echo "Algo deu errado"
+
+      - name: Executa sempre
+        if: always()
+        run: echo "Sempre vou executar"
