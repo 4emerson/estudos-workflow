@@ -1,0 +1,45 @@
+name: Course Catalog CI
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: course-catalog
+  IMAGE_TAG: 0.${{ gitea.run_number }}
+
+jobs:
+  testes:
+    name: Testes Unitários
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Build da imagem de teste
+        run: docker build --target test -t ${IMAGE_NAME}:test-${IMAGE_TAG} .
+
+      - name: Teste unitário
+        run: docker run --name unit-${IMAGE_TAG} ${IMAGE_NAME}:test-${IMAGE_TAG}
+
+      - name: Coleta dos relatórios
+        if: always()
+        run: | 
+          docker cp unit-${IMAGE_TAG}:/courseCatalog/reports .
+          sed -i "s|/courseCatalog|${GITHUB_WORKSPACE}|g" reports/coverage.xml
+
+      - name: Publicação dos relatórios
+        uses: actions/upload-artifact@v3
+        with:
+          name: relatorios-de-testes
+          path: reports/
+
+      - name: Limpeza
+        if: always()
+        run: |
+          docker rm -f unit-${IMAGE_TAG} || true
+          docker image rm -f ${IMAGE_NAME}:test-${IMAGE_TAG} || true
