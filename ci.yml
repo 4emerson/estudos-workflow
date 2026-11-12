@@ -11,7 +11,7 @@ env:
 
 jobs:
   testes:
-    name: Testes Unitários
+    name: Testes e qualidade
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,6 +37,23 @@ jobs:
         with:
           name: relatorios-de-testes
           path: reports/
+
+      - name: Analise do SonarQube
+        uses: SonarSource/sonarqube-scan-action@v8
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=course-catalog
+            -Dsonar.sources=project
+            -Dsonar.tests=tests
+            -Dsonar.python.version=3.12
+            -Dsonar.python.coverage.reportPaths=reports/coverage.xml
+            -Dsonar.python.xunit.reportPath=reports/junit.xml
+            -Dsonar.qualitygate.wait=false
+            -Dsonar.qualitygate.timeout=120
+
 
       - name: Limpeza
         if: always()
