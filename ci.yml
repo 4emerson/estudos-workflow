@@ -112,3 +112,32 @@ jobs:
           docker logout ${REGISTRY} || true
           docker image rm -f ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} || true
   
+  notificacao:
+    name: Notificação
+    runs-on: ubuntu-latest
+    needs: [testes, build]
+    # Executa sempre, inclusive quando um dos jobs anteriores falha
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: Resultado da pipeline
+        env:
+          NTFY_URL: ${{ vars.NTFY_URL }}
+          RESULTADOS: ${{ toJSON(needs) }}
+        run: |
+          if echo "${RESULTADOS}" | grep -qE '"result": "(failure|cancelled)"'; then
+            titulo="Falha na pipeline"
+            tags="x"
+            prioridade="high"
+          else
+            titulo="Pipeline concluída"
+            tags="white_check_mark"
+            prioridade="default"
+          fi
+          curl -fsS \
+            -H "Title: ${titulo}: ${GITHUB_REPOSITORY} ${IMAGE_TAG}" \
+            -H "Tags: ${tags}" \
+            -H "Priority: ${prioridade}" \
+            -H "Click: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            -d "Branch ${GITHUB_REF_NAME}, commit ${GITHUB_SHA:0:7}, por ${GITHUB_ACTOR}." \
+            ${NTFY_URL}
