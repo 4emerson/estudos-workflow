@@ -9,7 +9,8 @@ env:
   IMAGE_NAME: course-catalog
   IMAGE_TAG: 0.${{ gitea.run_number }}
   TRIVY_VERSION: 0.75.0
-  
+  REGISTRY: 192.168.88.20:8082
+
 jobs:
   testes:
     name: Testes e qualidade
@@ -63,7 +64,7 @@ jobs:
           docker image rm -f ${IMAGE_NAME}:test-${IMAGE_TAG} || true
 
   build:
-    name: Build e segurança
+    name: Build e push
     runs-on: ubuntu-latest
     needs: testes
     timeout-minutes: 45
@@ -74,10 +75,10 @@ jobs:
       - name: Build da imagem
         run: |
           docker build --build-arg APP_VERSION=${IMAGE_TAG} \
-            -t ${IMAGE_NAME}:${IMAGE_TAG} .
+            -t ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .
 
       - name: Conferindo a imagem
-        run: docker image ls ${IMAGE_NAME}:${IMAGE_TAG}
+        run: docker image ls ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
 
       - name: Análise de vulnerabilidades da imagem
         run: |
@@ -90,12 +91,24 @@ jobs:
             --severity CRITICAL --ignore-unfixed --exit-code 1 \
             --timeout 30m \
             --ignorefile /.trivyignore \
-            ${IMAGE_NAME}:${IMAGE_TAG}
+            ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
           docker cp .trivyignore trivy-${IMAGE_TAG}:/.trivyignore
           docker start -a trivy-${IMAGE_TAG}
+
+      - name: Login no Nexus
+        env:
+          NEXUS_USER: ${{ secrets.NEXUS_USER }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          echo "${NEXUS_PASSWORD}" | docker login ${REGISTRY} -u ${NEXUS_USER} --password-stdin
+
+      - name: Push para o Nexus
+        run: docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
 
       - name: Limpeza
         if: always()
         run: |
-          docker image rm -f ${IMAGE_NAME}:${IMAGE_TAG} || true
+          docker image rm -f ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} || true
+          docker logout ${REGISTRY} || true
+          docker image rm -f ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} || true
   
